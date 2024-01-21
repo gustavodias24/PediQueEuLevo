@@ -28,6 +28,10 @@
         android:theme="@style/Theme.PédiQueEulevo"
         tools:targetApi="31">
         <activity
+            android:name=".EditarProdutoActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.DarkActionBar"
+            android:exported="false" />
+        <activity
             android:name=".AdminActivity"
             android:exported="false" />
         <activity

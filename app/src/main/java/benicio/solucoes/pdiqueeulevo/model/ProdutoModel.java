@@ -18,6 +18,13 @@ public class ProdutoModel {
         this.temEstoque = temEstoque;
     }
 
+    @Override
+    public String toString() {
+
+        return   descri + '\n' +
+                 (temEstoque ? "Estoque Disponível" : "Estoque Não Disponível") ;
+    }
+
     public String getId() {
         return id;
     }
