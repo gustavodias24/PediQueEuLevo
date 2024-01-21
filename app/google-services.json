@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "783133230810",
+    "project_id": "pedi-que-eu-levo",
+    "storage_bucket": "pedi-que-eu-levo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783133230810:android:6652b589f6067b70e887e3",
+        "android_client_info": {
+          "package_name": "benicio.solucoes.pdiqueeulevo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4ym-zvXET_AG7Ku5tqoRZuFFcwDuqRRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
