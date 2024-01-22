@@ -36,11 +36,13 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import benicio.solucoes.pdiqueeulevo.CarrinhoActivity;
 import benicio.solucoes.pdiqueeulevo.EditarProdutoActivity;
 import benicio.solucoes.pdiqueeulevo.R;
 import benicio.solucoes.pdiqueeulevo.databinding.LayoutManagerProdutoBinding;
 import benicio.solucoes.pdiqueeulevo.databinding.SelectCameraOrGaleryLayoutBinding;
 import benicio.solucoes.pdiqueeulevo.model.ProdutoModel;
+import benicio.solucoes.pdiqueeulevo.util.CarrinhoUtil;
 
 public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHolder> {
 
@@ -140,6 +142,19 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
            c.startActivity(i);
 
        });
+
+       holder.btn_add_carrinho.setOnClickListener( view -> {
+           List<ProdutoModel> produtosCarrinho = CarrinhoUtil.loadProdutosCarrinho(c);
+           produtosCarrinho.add(produto);
+           CarrinhoUtil.saveProdutoCarrinho(produtosCarrinho, c, 0);
+       });
+
+        holder.btn_remover_carrinho.setOnClickListener( view -> {
+            produtos.remove(position);
+            CarrinhoUtil.saveProdutoCarrinho(produtos, c, 1);
+            this.notifyDataSetChanged();
+            CarrinhoActivity.verificarLista();
+        });
 
     }
 
