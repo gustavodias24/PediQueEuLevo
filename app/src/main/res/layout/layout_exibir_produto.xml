@@ -38,6 +38,14 @@
         android:text="Descrição do produto"
         android:textSize="12sp" />
 
+    <TextView
+        android:id="@+id/quantiadeValorCompradoProdutoCarrinho"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Quantidade Comprada:\nValor Comprado:"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/layoutUsuario"
         android:layout_width="match_parent"

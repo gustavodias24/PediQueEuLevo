@@ -6,6 +6,9 @@ public class ProdutoModel {
 
     boolean temEstoque;
 
+    float quantidadeComprada;
+    double valorQuantidadeComprada;
+
     public ProdutoModel() {
     }
 
@@ -23,6 +26,22 @@ public class ProdutoModel {
 
         return   descri + '\n' +
                  (temEstoque ? "Estoque Disponível" : "Estoque Não Disponível") ;
+    }
+
+    public double getValorQuantidadeComprada() {
+        return valorQuantidadeComprada;
+    }
+
+    public void setValorQuantidadeComprada(double valorQuantidadeComprada) {
+        this.valorQuantidadeComprada = valorQuantidadeComprada;
+    }
+
+    public float getQuantidadeComprada() {
+        return quantidadeComprada;
+    }
+
+    public void setQuantidadeComprada(float quantidadeComprada) {
+        this.quantidadeComprada = quantidadeComprada;
     }
 
     public String getId() {

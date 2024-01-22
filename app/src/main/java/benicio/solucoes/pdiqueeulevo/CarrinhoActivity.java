@@ -3,12 +3,14 @@ package benicio.solucoes.pdiqueeulevo;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,9 +26,14 @@ import benicio.solucoes.pdiqueeulevo.adapter.AdapterProduto;
 import benicio.solucoes.pdiqueeulevo.databinding.ActivityCarrinhoBinding;
 import benicio.solucoes.pdiqueeulevo.databinding.ActivityEditarProdutoBinding;
 import benicio.solucoes.pdiqueeulevo.databinding.LoadingScreenBinding;
+import benicio.solucoes.pdiqueeulevo.model.BodyItems;
+import benicio.solucoes.pdiqueeulevo.model.ItemModel;
 import benicio.solucoes.pdiqueeulevo.model.ProdutoModel;
+import benicio.solucoes.pdiqueeulevo.services.MercadoPagoService;
 import benicio.solucoes.pdiqueeulevo.util.CarrinhoUtil;
 import benicio.solucoes.pdiqueeulevo.util.MathUtils;
+import benicio.solucoes.pdiqueeulevo.util.RetrofitUtil;
+import retrofit2.Retrofit;
 
 public class CarrinhoActivity extends AppCompatActivity {
 
@@ -36,6 +43,9 @@ public class CarrinhoActivity extends AppCompatActivity {
     private AdapterProduto adapterProduto;
     public static List<ProdutoModel> produtos = new ArrayList<>();
 
+    private BodyItems bodyItems;
+    private Retrofit retrofit;
+    private MercadoPagoService service;
     private Dialog dialogCarregando;
     @SuppressLint("ResourceType")
     @Override
@@ -55,10 +65,28 @@ public class CarrinhoActivity extends AppCompatActivity {
 
         configurarDialogCarregando();
         configurarrRecyclerProdutos();
+        configurarRetrofit();
+
+        mainBinding.btnFinalizarCompra.setOnClickListener( view -> {
+//            for ( ProdutoModel produto : produtos){
+//                new ItemModel(produto.getNome(), produto.getDescri(), produto.getLinkImage(),);
+//            }
+
+//            service.criarLinkPagamento()
+            String url = "https://developers.android.com";
+            CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                    .build();
+            intent.launchUrl(this, Uri.parse(url));
+        });
+
+
 
     }
 
-
+    private void configurarRetrofit(){
+        retrofit = RetrofitUtil.createRetrofit();
+        service = RetrofitUtil.createService(retrofit);
+    }
     private void configurarrRecyclerProdutos(){
         recyclerViewProdutos = mainBinding.recyclerProdutos;
         recyclerViewProdutos.setLayoutManager(new LinearLayoutManager(this));
@@ -87,7 +115,7 @@ public class CarrinhoActivity extends AppCompatActivity {
     public static void calcularValor(){
         double soma = 0.0;
         for ( ProdutoModel produtoModel : produtos){
-            soma += MathUtils.converterParaDouble(produtoModel.getPreco());
+            soma += produtoModel.getValorQuantidadeComprada();
         }
 
         mainBinding.textTotalCompra.setText(

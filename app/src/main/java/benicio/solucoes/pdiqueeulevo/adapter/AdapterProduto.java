@@ -4,7 +4,6 @@ import static android.app.Activity.RESULT_OK;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -23,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,9 +40,11 @@ import benicio.solucoes.pdiqueeulevo.CarrinhoActivity;
 import benicio.solucoes.pdiqueeulevo.EditarProdutoActivity;
 import benicio.solucoes.pdiqueeulevo.R;
 import benicio.solucoes.pdiqueeulevo.databinding.LayoutManagerProdutoBinding;
+import benicio.solucoes.pdiqueeulevo.databinding.LayoutQuantidadeBinding;
 import benicio.solucoes.pdiqueeulevo.databinding.SelectCameraOrGaleryLayoutBinding;
 import benicio.solucoes.pdiqueeulevo.model.ProdutoModel;
 import benicio.solucoes.pdiqueeulevo.util.CarrinhoUtil;
+import benicio.solucoes.pdiqueeulevo.util.MathUtils;
 
 public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHolder> {
 
@@ -57,6 +59,7 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
     Boolean dentroDoCarrinho = false;
 
     Dialog dialogCarregando;
+    Dialog dialogQuantidade;
 
 
     public AdapterProduto(List<ProdutoModel> produtos, Activity c, Boolean isADM, Boolean dentroDoCarrinho, Dialog dialogCarregando) {
@@ -115,6 +118,11 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
        }
 
        if ( dentroDoCarrinho ){
+           holder.quantiadeValorCompradoProdutoCarrinho.setVisibility(View.VISIBLE);
+           holder.quantiadeValorCompradoProdutoCarrinho.setText(
+                   "Quantidade Comprada: "+ produto.getQuantidadeComprada() +
+                   " KG\nValor: " + MathUtils.formatarMoeda(produto.getValorQuantidadeComprada())
+           );
            holder.btn_add_carrinho.setVisibility(View.GONE);
        }else{
            holder.btn_remover_carrinho.setVisibility(View.GONE);
@@ -144,9 +152,33 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
        });
 
        holder.btn_add_carrinho.setOnClickListener( view -> {
-           List<ProdutoModel> produtosCarrinho = CarrinhoUtil.loadProdutosCarrinho(c);
-           produtosCarrinho.add(produto);
-           CarrinhoUtil.saveProdutoCarrinho(produtosCarrinho, c, 0);
+           AlertDialog.Builder b = new AlertDialog.Builder(c);
+
+           b.setTitle("Escolha a Quantidade");
+           LayoutQuantidadeBinding quantidadeBinding = LayoutQuantidadeBinding.inflate(c.getLayoutInflater());
+           quantidadeBinding.confirmarQuantidade.setOnClickListener(confirmarView -> {
+               try{
+                   float quantidade = Float.parseFloat(quantidadeBinding.qunatidadeComprada.getText().toString().replace(",", "."));
+
+                   List<ProdutoModel> produtosCarrinho = CarrinhoUtil.loadProdutosCarrinho(c);
+
+                   produto.setQuantidadeComprada( quantidade );
+                   double quantidadeCompradaValor = MathUtils.converterParaDouble(produto.getPreco()) * quantidade;
+                   produto.setValorQuantidadeComprada(quantidadeCompradaValor);
+
+                   produtosCarrinho.add(produto);
+                   CarrinhoUtil.saveProdutoCarrinho(produtosCarrinho, c, 0);
+                   dialogQuantidade.dismiss();
+
+               }catch (Exception e){
+                   Toast.makeText(c, "Quantidade Inválida", Toast.LENGTH_SHORT).show();
+               }
+           });
+           b.setView(quantidadeBinding.getRoot());
+           dialogQuantidade = b.create();
+           dialogQuantidade.show();
+
+
        });
 
         holder.btn_remover_carrinho.setOnClickListener( view -> {
@@ -168,7 +200,7 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
         ProgressBar carregandoImageDoProduto;
         ImageView imageDoProdutoExibicao;
 
-        TextView nomeDoProdutoExibicao, descricaoDoProdutoExibicao;
+        TextView nomeDoProdutoExibicao, descricaoDoProdutoExibicao, quantiadeValorCompradoProdutoCarrinho;
         Button btn_add_carrinho, btn_remover_carrinho, btn_editar_produto, btn_excluir_produto;
         LinearLayout layoutAdmin, layoutUsuario;
         public MyViewHolder(@NonNull View itemView) {
@@ -183,6 +215,7 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
             nomeDoProdutoExibicao = itemView.findViewById(R.id.nomeDoProdutoExibicao);
             descricaoDoProdutoExibicao = itemView.findViewById(R.id.descricaoDoProdutoExibicao);
             layoutUsuario = itemView.findViewById(R.id.layoutUsuario);
+            quantiadeValorCompradoProdutoCarrinho = itemView.findViewById(R.id.quantiadeValorCompradoProdutoCarrinho);
         }
     }
 
