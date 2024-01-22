@@ -10,11 +10,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -29,10 +31,14 @@ import benicio.solucoes.pdiqueeulevo.databinding.LoadingScreenBinding;
 import benicio.solucoes.pdiqueeulevo.model.BodyItems;
 import benicio.solucoes.pdiqueeulevo.model.ItemModel;
 import benicio.solucoes.pdiqueeulevo.model.ProdutoModel;
+import benicio.solucoes.pdiqueeulevo.model.ResponseMercadoPagoModel;
 import benicio.solucoes.pdiqueeulevo.services.MercadoPagoService;
 import benicio.solucoes.pdiqueeulevo.util.CarrinhoUtil;
 import benicio.solucoes.pdiqueeulevo.util.MathUtils;
 import benicio.solucoes.pdiqueeulevo.util.RetrofitUtil;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class CarrinhoActivity extends AppCompatActivity {
@@ -43,10 +49,11 @@ public class CarrinhoActivity extends AppCompatActivity {
     private AdapterProduto adapterProduto;
     public static List<ProdutoModel> produtos = new ArrayList<>();
 
-    private BodyItems bodyItems;
     private Retrofit retrofit;
     private MercadoPagoService service;
     private Dialog dialogCarregando;
+
+    private static StringBuilder infoPedido = new StringBuilder();
     @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,18 +75,48 @@ public class CarrinhoActivity extends AppCompatActivity {
         configurarRetrofit();
 
         mainBinding.btnFinalizarCompra.setOnClickListener( view -> {
-//            for ( ProdutoModel produto : produtos){
-//                new ItemModel(produto.getNome(), produto.getDescri(), produto.getLinkImage(),);
-//            }
+            dialogCarregando.show();
+            List<ItemModel> items = new ArrayList<>();
+            for ( ProdutoModel produto : produtos){
+                items.add(
+                        new ItemModel(produto.getNome(),
+                                produto.getDescri(),
+                                produto.getLinkImage(),
+                                produto.getQuantidadeComprada(),
+                                produto.getValorQuantidadeComprada())
+                );
+            }
+            BodyItems bodyItems = new BodyItems();
+            bodyItems.setItems(items);
 
-//            service.criarLinkPagamento()
-            String url = "https://developers.android.com";
-            CustomTabsIntent intent = new CustomTabsIntent.Builder()
-                    .build();
-            intent.launchUrl(this, Uri.parse(url));
+            service.criarLinkPagamento(bodyItems).enqueue(new Callback<ResponseMercadoPagoModel>() {
+                @Override
+                public void onResponse(Call<ResponseMercadoPagoModel> call, Response<ResponseMercadoPagoModel> response) {
+                    dialogCarregando.dismiss();
+                    if ( response.isSuccessful()){
+                        CarrinhoUtil.saveProdutoCarrinho(new ArrayList<>(), CarrinhoActivity.this, 3);
+                        assert response.body() != null;
+                        String url = response.body().getInit_point();
+
+                        Intent intentInstrucao = new Intent(CarrinhoActivity.this, InstrucaoActivity.class);
+                        intentInstrucao.putExtra("infoPedido", infoPedido.toString());
+                        startActivity(intentInstrucao);
+
+                        CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                                .build();
+                        intent.launchUrl(CarrinhoActivity.this, Uri.parse(url));
+                    }else{
+                        Toast.makeText(CarrinhoActivity.this, response.message(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+                @Override
+                public void onFailure(Call<ResponseMercadoPagoModel> call, Throwable t) {
+                    Toast.makeText(CarrinhoActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    dialogCarregando.dismiss();
+                }
+            });
+
         });
-
-
 
     }
 
@@ -92,6 +129,7 @@ public class CarrinhoActivity extends AppCompatActivity {
         recyclerViewProdutos.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewProdutos.setHasFixedSize(true);
         recyclerViewProdutos.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        produtos.clear();
         produtos.addAll(CarrinhoUtil.loadProdutosCarrinho(this));
         verificarLista();
         adapterProduto = new AdapterProduto(produtos, this, false, true, dialogCarregando);
@@ -114,13 +152,23 @@ public class CarrinhoActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     public static void calcularValor(){
         double soma = 0.0;
+        infoPedido = new StringBuilder();
+        infoPedido.append("*Informações da Compra*").append("\n").append("\n");
+        infoPedido.append("Item(s):").append("\n").append("\n");
         for ( ProdutoModel produtoModel : produtos){
             soma += produtoModel.getValorQuantidadeComprada();
+            infoPedido.append("Produto: ").append(produtoModel.getNome()).append("\n");
+            infoPedido.append("Preço: ").append(produtoModel.getPreco()).append("\n");
+            infoPedido.append("Quantidade: ").append(produtoModel.getQuantidadeComprada()).append(" KG").append("\n");
+            infoPedido.append("Valor da Compra: ").append(MathUtils.formatarMoeda(produtoModel.getValorQuantidadeComprada())).append("\n").append("\n");
+
         }
 
         mainBinding.textTotalCompra.setText(
                 "Total da Compra: " + MathUtils.formatarMoeda(soma)
         );
+        infoPedido.append("Total da Compra: " + MathUtils.formatarMoeda(soma)).append("\n").append("\n");
+        infoPedido.append("\uD83D\uDCC2\uD83D\uDCCESegue o Comprovante:");
     }
     private void configurarDialogCarregando() {
         android.app.AlertDialog.Builder b = new android.app.AlertDialog.Builder(this);

@@ -4,11 +4,11 @@ public class ItemModel {
         String title;
         String description;
         String picture_url;
-        int quantity;
+        float quantity;
         String currency_id = "BRL";
-        float unit_price;
+        double unit_price;
 
-    public ItemModel(String title, String description, String picture_url, int quantity, float unit_price) {
+    public ItemModel(String title, String description, String picture_url, float quantity, double unit_price) {
         this.title = title;
         this.description = description;
         this.picture_url = picture_url;
@@ -40,19 +40,19 @@ public class ItemModel {
         this.picture_url = picture_url;
     }
 
-    public int getQuantity() {
+    public float getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(float quantity) {
         this.quantity = quantity;
     }
 
-    public float getUnit_price() {
+    public double getUnit_price() {
         return unit_price;
     }
 
-    public void setUnit_price(float unit_price) {
+    public void setUnit_price(double unit_price) {
         this.unit_price = unit_price;
     }
 }

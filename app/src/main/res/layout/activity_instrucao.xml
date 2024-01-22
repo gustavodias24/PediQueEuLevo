@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="#FEFEFE"
+    android:gravity="center|center_horizontal"
+    android:orientation="vertical"
+    android:padding="8dp"
+    tools:context=".InstrucaoActivity">
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="Completou o Pagamento?"
+        android:textColor="#000000"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <pl.droidsonroids.gif.GifImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:src="@drawable/completed" />
+
+    <Button
+        android:id="@+id/btn_zap"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/verde"
+        android:text="Entrar em Contato"
+        android:textAllCaps="true"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:icon="@drawable/common_full_open_on_phone"
+        app:iconGravity="textStart"
+        app:iconSize="45dp" />
+
+    <Button
+        android:id="@+id/btn_voltar_ao_inicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/amarelo"
+        android:text="Voltar ao Inicio"
+        android:textAllCaps="true"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:iconGravity="textStart"
+        app:iconSize="45dp" />
+
+</LinearLayout>

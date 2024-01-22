@@ -24,7 +24,7 @@ public class CarrinhoUtil {
 
         if ( t == 0){
             Toast.makeText(c, "Produto Adicionado!", Toast.LENGTH_SHORT).show();
-        }else{
+        }else if ( t == 1){
             Toast.makeText(c, "Produto Removido!", Toast.LENGTH_SHORT).show();
         }
 
