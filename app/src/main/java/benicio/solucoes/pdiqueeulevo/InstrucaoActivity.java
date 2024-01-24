@@ -38,7 +38,7 @@ public class InstrucaoActivity extends AppCompatActivity {
         mainBinding.btnZap.setOnClickListener(
                 view ->
                 startActivity(new Intent(
-                        Intent.ACTION_VIEW, Uri.parse(convertToWhatsappLink("5591984044333", infoPedido))
+                        Intent.ACTION_VIEW, Uri.parse(convertToWhatsappLink("5566996825146", infoPedido))
                 )));
     }
 

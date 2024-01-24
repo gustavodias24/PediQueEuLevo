@@ -7,6 +7,6 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface MercadoPagoService {
-    @POST("/checkout/preferences?access_token=TEST-3237615834213855-061314-089b4e11d795e4c0347b6eca3f1c9791-782330883")
+    @POST("/checkout/preferences?access_token=APP_USR-1676541494858991-012315-8952871b379a822788606307ee722f47-1638695857")
     Call<ResponseMercadoPagoModel> criarLinkPagamento(@Body BodyItems bodyItem);
 }
