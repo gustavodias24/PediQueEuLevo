@@ -19,16 +19,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnFinalizarCompra"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/verde"
-                android:text="FINALIZAR COMPRA"
-                android:textAllCaps="true"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
-
             <TextView
                 android:id="@+id/textTotalCompra"
                 android:layout_width="match_parent"
@@ -64,8 +54,19 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerProdutos"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent"
+            android:layout_weight="1">
 
         </androidx.recyclerview.widget.RecyclerView>
+
+        <Button
+            android:id="@+id/btnFinalizarCompra"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/verde"
+            android:text="FINALIZAR COMPRA"
+            android:textAllCaps="true"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>
