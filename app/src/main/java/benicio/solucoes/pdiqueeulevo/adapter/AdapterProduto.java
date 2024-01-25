@@ -152,31 +152,36 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
        });
 
        holder.btn_add_carrinho.setOnClickListener( view -> {
-           AlertDialog.Builder b = new AlertDialog.Builder(c);
+           if( produto.isTemEstoque() ){
+               AlertDialog.Builder b = new AlertDialog.Builder(c);
 
-           b.setTitle("Escolha a Quantidade");
-           LayoutQuantidadeBinding quantidadeBinding = LayoutQuantidadeBinding.inflate(c.getLayoutInflater());
-           quantidadeBinding.confirmarQuantidade.setOnClickListener(confirmarView -> {
-               try{
-                   float quantidade = Float.parseFloat(quantidadeBinding.qunatidadeComprada.getText().toString().replace(",", "."));
+               b.setTitle("Escolha a Quantidade");
+               LayoutQuantidadeBinding quantidadeBinding = LayoutQuantidadeBinding.inflate(c.getLayoutInflater());
+               quantidadeBinding.confirmarQuantidade.setOnClickListener(confirmarView -> {
+                   try{
+                       float quantidade = Float.parseFloat(quantidadeBinding.qunatidadeComprada.getText().toString().replace(",", "."));
 
-                   List<ProdutoModel> produtosCarrinho = CarrinhoUtil.loadProdutosCarrinho(c);
+                       List<ProdutoModel> produtosCarrinho = CarrinhoUtil.loadProdutosCarrinho(c);
 
-                   produto.setQuantidadeComprada( quantidade );
-                   double quantidadeCompradaValor = MathUtils.converterParaDouble(produto.getPreco()) * quantidade;
-                   produto.setValorQuantidadeComprada(quantidadeCompradaValor);
+                       produto.setQuantidadeComprada( quantidade );
+                       double quantidadeCompradaValor = MathUtils.converterParaDouble(produto.getPreco()) * quantidade;
+                       produto.setValorQuantidadeComprada(quantidadeCompradaValor);
 
-                   produtosCarrinho.add(produto);
-                   CarrinhoUtil.saveProdutoCarrinho(produtosCarrinho, c, 0);
-                   dialogQuantidade.dismiss();
+                       produtosCarrinho.add(produto);
+                       CarrinhoUtil.saveProdutoCarrinho(produtosCarrinho, c, 0);
+                       dialogQuantidade.dismiss();
 
-               }catch (Exception e){
-                   Toast.makeText(c, "Quantidade Inválida", Toast.LENGTH_SHORT).show();
-               }
-           });
-           b.setView(quantidadeBinding.getRoot());
-           dialogQuantidade = b.create();
-           dialogQuantidade.show();
+                   }catch (Exception e){
+                       Toast.makeText(c, "Quantidade Inválida", Toast.LENGTH_SHORT).show();
+                   }
+               });
+               b.setView(quantidadeBinding.getRoot());
+               dialogQuantidade = b.create();
+               dialogQuantidade.show();
+           }else{
+               Toast.makeText(c, "Produto Indisponível no Momento!", Toast.LENGTH_SHORT).show();
+           }
+           
 
 
        });
