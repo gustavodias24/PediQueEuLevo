@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RadioButton
+                android:id="@+id/radioCartao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cartão" />
+
+            <RadioButton
+                android:id="@+id/radioDinheiro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dinheiro" />
+
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/layoutDinheiro"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Precisa de Troco?" />
+
+            <com.vicmikhailau.maskededittext.MaskedEditText
+                android:id="@+id/edtTroco"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Quanto de Troco R$"
+                android:inputType="text"
+                app:mask="R$ *******************************"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/finalizarCompraPresencial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/verde"
+            android:text="FINALIZAR COMPRA"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+    </LinearLayout></ScrollView>

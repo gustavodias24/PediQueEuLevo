@@ -31,6 +31,7 @@ import benicio.solucoes.pdiqueeulevo.adapter.AdapterProduto;
 import benicio.solucoes.pdiqueeulevo.databinding.ActivityLojaBinding;
 import benicio.solucoes.pdiqueeulevo.databinding.LoadingScreenBinding;
 import benicio.solucoes.pdiqueeulevo.model.ProdutoModel;
+import benicio.solucoes.pdiqueeulevo.util.CarrinhoUtil;
 
 public class LojaActivity extends AppCompatActivity {
 
@@ -41,7 +42,7 @@ public class LojaActivity extends AppCompatActivity {
     private List<ProdutoModel> produtos = new ArrayList<>();
 
     private Dialog  dialogCarregando;
-    @SuppressLint("ResourceType")
+    @SuppressLint({"ResourceType", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +56,19 @@ public class LojaActivity extends AppCompatActivity {
         configurarDialogCarregando();
         configurarrRecyclerProdutos();
         ListenerProdutos();
+
+       atualizarCarrinho();
+    }
+
+    @Override
+    protected void onStart() {
+        atualizarCarrinho();
+        super.onStart();
+    }
+
+    private void atualizarCarrinho(){
+        List<ProdutoModel> produtosCarrinho = CarrinhoUtil.loadProdutosCarrinho(this);
+        mainBinding.exibirQuantidadeCarrinho.setText(produtosCarrinho.size() + " Produto(s) no Carrinho");
     }
 
     @Override
@@ -78,7 +92,7 @@ public class LojaActivity extends AppCompatActivity {
         recyclerViewProdutos.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewProdutos.setHasFixedSize(true);
         recyclerViewProdutos.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        adapterProduto = new AdapterProduto(produtos, this, false, false, dialogCarregando);
+        adapterProduto = new AdapterProduto(produtos, this, false, false, dialogCarregando, mainBinding.exibirQuantidadeCarrinho);
         recyclerViewProdutos.setAdapter(adapterProduto);
     }
 

@@ -62,12 +62,22 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
     Dialog dialogQuantidade;
 
 
+    TextView exibirQuantidadeCarrinho;
     public AdapterProduto(List<ProdutoModel> produtos, Activity c, Boolean isADM, Boolean dentroDoCarrinho, Dialog dialogCarregando) {
         this.produtos = produtos;
         this.c = c;
         this.isADM = isADM;
         this.dentroDoCarrinho = dentroDoCarrinho;
         this.dialogCarregando = dialogCarregando;
+    }
+
+    public AdapterProduto(List<ProdutoModel> produtos, Activity c, Boolean isADM, Boolean dentroDoCarrinho, Dialog dialogCarregando, TextView exibirQuantidadeCarrinho) {
+        this.produtos = produtos;
+        this.c = c;
+        this.isADM = isADM;
+        this.dentroDoCarrinho = dentroDoCarrinho;
+        this.dialogCarregando = dialogCarregando;
+        this.exibirQuantidadeCarrinho = exibirQuantidadeCarrinho;
     }
 
     @NonNull
@@ -169,6 +179,7 @@ public class AdapterProduto extends RecyclerView.Adapter<AdapterProduto.MyViewHo
 
                        produtosCarrinho.add(produto);
                        CarrinhoUtil.saveProdutoCarrinho(produtosCarrinho, c, 0);
+                       exibirQuantidadeCarrinho.setText(produtosCarrinho.size() + " Produto(s) no Carrinho");
                        dialogQuantidade.dismiss();
 
                    }catch (Exception e){

@@ -9,10 +9,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -22,11 +25,13 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 
 import benicio.solucoes.pdiqueeulevo.adapter.AdapterProduto;
 import benicio.solucoes.pdiqueeulevo.databinding.ActivityCarrinhoBinding;
 import benicio.solucoes.pdiqueeulevo.databinding.ActivityEditarProdutoBinding;
+import benicio.solucoes.pdiqueeulevo.databinding.LayoutPagamentoEntregaBinding;
 import benicio.solucoes.pdiqueeulevo.databinding.LoadingScreenBinding;
 import benicio.solucoes.pdiqueeulevo.model.BodyItems;
 import benicio.solucoes.pdiqueeulevo.model.ItemModel;
@@ -54,6 +59,8 @@ public class CarrinhoActivity extends AppCompatActivity {
     private Dialog dialogCarregando;
 
     private static StringBuilder infoPedido = new StringBuilder();
+
+    private static Random random;
     @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +69,7 @@ public class CarrinhoActivity extends AppCompatActivity {
         setContentView(mainBinding.getRoot());
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
+        random = new Random();
         layoutCompra = mainBinding.layoutFinalizarCompra;
         getSupportActionBar().setTitle("Carrinho");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -75,49 +82,96 @@ public class CarrinhoActivity extends AppCompatActivity {
         configurarRetrofit();
 
         mainBinding.btnFinalizarCompra.setOnClickListener( view -> {
-            dialogCarregando.show();
-            List<ItemModel> items = new ArrayList<>();
-            for ( ProdutoModel produto : produtos){
-                items.add(
-                        new ItemModel(produto.getNome(),
-                                produto.getDescri(),
-                                produto.getLinkImage(),
-                                produto.getQuantidadeComprada(),
-                                produto.getValorQuantidadeComprada())
-                );
-            }
-            BodyItems bodyItems = new BodyItems();
-            bodyItems.setItems(items);
+            AlertDialog.Builder b = new AlertDialog.Builder(this);
+            b.setTitle("Atenção!");
+            b.setMessage("O pagamento vai ser realizado na entrega?");
+            b.setPositiveButton("Sim", (dialogInterface, i) -> pagamentoPresencial());
 
-            service.criarLinkPagamento(bodyItems).enqueue(new Callback<ResponseMercadoPagoModel>() {
-                @Override
-                public void onResponse(Call<ResponseMercadoPagoModel> call, Response<ResponseMercadoPagoModel> response) {
-                    dialogCarregando.dismiss();
-                    if ( response.isSuccessful()){
-                        CarrinhoUtil.saveProdutoCarrinho(new ArrayList<>(), CarrinhoActivity.this, 3);
-                        assert response.body() != null;
-                        String url = response.body().getInit_point();
+            b.setNegativeButton("Não", (dialogInterface, i) -> pagamentoOnline());
 
-                        Intent intentInstrucao = new Intent(CarrinhoActivity.this, InstrucaoActivity.class);
-                        intentInstrucao.putExtra("infoPedido", infoPedido.toString());
-                        startActivity(intentInstrucao);
-
-                        CustomTabsIntent intent = new CustomTabsIntent.Builder()
-                                .build();
-                        intent.launchUrl(CarrinhoActivity.this, Uri.parse(url));
-                    }else{
-                        Toast.makeText(CarrinhoActivity.this, response.message(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-                @Override
-                public void onFailure(Call<ResponseMercadoPagoModel> call, Throwable t) {
-                    Toast.makeText(CarrinhoActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    dialogCarregando.dismiss();
-                }
-            });
-
+            b.create().show();
         });
 
+    }
+
+    private void pagamentoPresencial(){
+        AlertDialog.Builder dialogDinheiroCartao = new AlertDialog.Builder(CarrinhoActivity.this);
+        dialogDinheiroCartao.setTitle("Escolha o método");
+        LayoutPagamentoEntregaBinding pagamentoEntregaBinding = LayoutPagamentoEntregaBinding.inflate(getLayoutInflater());
+
+        pagamentoEntregaBinding.radioDinheiro.setOnClickListener(view1 -> pagamentoEntregaBinding.layoutDinheiro.setVisibility(View.VISIBLE));
+        pagamentoEntregaBinding.radioCartao.setOnClickListener(view1 -> pagamentoEntregaBinding.layoutDinheiro.setVisibility(View.GONE));
+
+
+        pagamentoEntregaBinding.finalizarCompraPresencial.setOnClickListener( view -> {
+
+            CarrinhoUtil.saveProdutoCarrinho(new ArrayList<>(), CarrinhoActivity.this, 3);
+            infoPedido.append("-Pagamento na Entrega-").append("\n");
+            infoPedido.append("Método: ").append( pagamentoEntregaBinding.radioCartao.isChecked() ? "Cartão" : "Dinheiro").append("\n");
+            String troco = pagamentoEntregaBinding.edtTroco.getText().toString();
+            if ( !troco.isEmpty() ){
+                infoPedido.append("Troco: ").append( troco ).append("\n");
+            }else{
+                infoPedido.append("Não Precisa de Troco.").append( troco ).append("\n");
+            }
+            startActivity(
+                    new Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(
+                                    InstrucaoActivity.convertToWhatsappLink("5566996825146", infoPedido.toString())
+                            )
+                    )
+            );
+
+        });
+        dialogDinheiroCartao.setView(pagamentoEntregaBinding.getRoot());
+        dialogDinheiroCartao.create().show();
+    }
+    private void pagamentoOnline(){
+        dialogCarregando.show();
+        List<ItemModel> items = new ArrayList<>();
+        for ( ProdutoModel produto : produtos){
+            items.add(
+                    new ItemModel(produto.getNome(),
+                             produto.getQuantidadeComprada()+"X "+ produto.getDescri(),
+                            produto.getLinkImage(),
+                            1,
+                            produto.getValorQuantidadeComprada())
+            );
+
+            Log.d("mayara1", "pagamentoOnline: " + produto.getValorQuantidadeComprada());
+        }
+        BodyItems bodyItems = new BodyItems();
+        bodyItems.setItems(items);
+
+        service.criarLinkPagamento(bodyItems).enqueue(new Callback<ResponseMercadoPagoModel>() {
+            @Override
+            public void onResponse(Call<ResponseMercadoPagoModel> call, Response<ResponseMercadoPagoModel> response) {
+                dialogCarregando.dismiss();
+                if ( response.isSuccessful()){
+                    CarrinhoUtil.saveProdutoCarrinho(new ArrayList<>(), CarrinhoActivity.this, 3);
+                    assert response.body() != null;
+                    String url = response.body().getInit_point();
+
+                    infoPedido.append("\uD83D\uDCC2\uD83D\uDCCESegue o Comprovante:");
+
+                    Intent intentInstrucao = new Intent(CarrinhoActivity.this, InstrucaoActivity.class);
+                    intentInstrucao.putExtra("infoPedido", infoPedido.toString());
+                    startActivity(intentInstrucao);
+
+                    CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                            .build();
+                    intent.launchUrl(CarrinhoActivity.this, Uri.parse(url));
+                }else{
+                    Toast.makeText(CarrinhoActivity.this, response.message(), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseMercadoPagoModel> call, Throwable t) {
+                Toast.makeText(CarrinhoActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                dialogCarregando.dismiss();
+            }
+        });
     }
 
     private void configurarRetrofit(){
@@ -154,8 +208,10 @@ public class CarrinhoActivity extends AppCompatActivity {
         double soma = 0.0;
         infoPedido = new StringBuilder();
         infoPedido.append("*Informações da Compra*").append("\n").append("\n");
+        infoPedido.append("_Número do Peidido:_ ").append(gerarNumeroAleatorio(10, random)).append("\n").append("\n");
         infoPedido.append("Item(s):").append("\n").append("\n");
         for ( ProdutoModel produtoModel : produtos){
+            Log.d("mayara2", "pagamentoOnline: " + produtoModel.getValorQuantidadeComprada());
             soma += produtoModel.getValorQuantidadeComprada();
             infoPedido.append("Produto: ").append(produtoModel.getNome()).append("\n");
             infoPedido.append("Preço: ").append(produtoModel.getPreco()).append("\n");
@@ -168,7 +224,6 @@ public class CarrinhoActivity extends AppCompatActivity {
                 "Total da Compra: " + MathUtils.formatarMoeda(soma)
         );
         infoPedido.append("Total da Compra: " + MathUtils.formatarMoeda(soma)).append("\n").append("\n");
-        infoPedido.append("\uD83D\uDCC2\uD83D\uDCCESegue o Comprovante:");
     }
     private void configurarDialogCarregando() {
         android.app.AlertDialog.Builder b = new android.app.AlertDialog.Builder(this);
@@ -182,5 +237,14 @@ public class CarrinhoActivity extends AppCompatActivity {
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private static long gerarNumeroAleatorio(int numeroDigitos, Random random) {
+        // Fórmula para gerar um número aleatório com o número de dígitos especificado
+        long limiteInferior = (long) Math.pow(10, numeroDigitos - 1);
+        long limiteSuperior = (long) Math.pow(10, numeroDigitos) - 1;
+
+        // Garantir que o número gerado seja positivo
+        return Math.abs(limiteInferior + random.nextLong() % (limiteSuperior - limiteInferior + 1));
     }
 }
